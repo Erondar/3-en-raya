@@ -47,7 +47,7 @@ const App = () => {
   return (
     <>
       <main className="board">
-        <h1>3 en raya</h1>
+        <h1>3 en raya by Iván Vega</h1>
         <button onClick={resetGame}>Reset del juego</button>
         <section className="game">
           {board.map((square, index) => {
