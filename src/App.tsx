@@ -1,19 +1,33 @@
 import { useState } from "react"
-import confetti from "canvas-confetti"
 import Square from "./Components/Square"
 import { TURNS } from "./Constants/Constantes"
-import { checkWinner, checkEndGame } from "./Logic/Helpers"
+import { setWinnerFunc } from "./Logic/Helpers"
 import WinnerModal from "./Components/WinnerModal"
 
 const App = () => {
-  const [board, setBoard] = useState(Array(9).fill(null))
-  const [turn, setTurn] = useState(TURNS.X)
   const [winner, setWinner] = useState<string | boolean | null>(null) //null no hay ganador y false empate
+
+  const [board, setBoard] = useState<string[]>(() => {
+    const local = localStorage.getItem("board")
+    if (local) {
+      const localBoard = JSON.parse(local)
+      setWinnerFunc(localBoard, setWinner)
+
+      return JSON.parse(local)
+    } else return Array(9).fill(null)
+  })
+  const [turn, setTurn] = useState<string>(() => {
+    const local = localStorage.getItem("turn")
+    if (local) return local
+    else return TURNS.X
+  })
 
   const resetGame = () => {
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+    localStorage.removeItem("board")
+    localStorage.removeItem("turn")
   }
 
   const updateBoard = (index: number) => {
@@ -21,17 +35,13 @@ const App = () => {
     const newBoard = [...board]
     newBoard[index] = turn
     setBoard(newBoard)
+    localStorage.setItem("board", JSON.stringify(newBoard))
 
-    const newWinner = checkWinner(newBoard)
-    if (newWinner) {
-      confetti()
-      setWinner(newWinner)
-    } else if (checkEndGame(newBoard)) {
-      setWinner(false)
-    }
+    setWinnerFunc(newBoard, setWinner)
 
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+    localStorage.setItem("turn", newTurn)
   }
 
   return (
